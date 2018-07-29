@@ -3,18 +3,37 @@
 # found on <http://files.majorsilence.com/rubbish/pygtk-book/pygtk-notebook-html/pygtk-notebook-latest.html#SECTION00430000000000000000>
 # simple example of a tray icon application using PyGTK
 
+#mentions for code borrowing
+
+#https://github.com/tobyhodges/timers/blob/master/clitimer.py
+#https://stackoverflow.com/questions/19078170/python-how-would-you-save-a-simple-settings-config-file
 
 import time, os, sys
 
 import gtk,gobject
+import subprocess
+
+import pynotify
+from ConfigParser import SafeConfigParser
+
 
 
 win = gtk.Window()
 textview = gtk.TextView()
-button1 = gtk.Button( "Press me")
-button2 = gtk.Button( "Big red button")
+button1 = gtk.Button( "Just Had One")
+button2 = gtk.Button( "Skip Smoke")
 label1 = gtk.Label( "Hello world")
+start_time = 0
+current_time = 0
+finish_time = 0 
  
+def sendmessage(message):
+    pynotify.init("Test")
+    notice = pynotify.Notification("aha", message)
+    notice.show()
+    #subprocess.Popen(['notify-send', message])
+    return
+
 def message(data=None):
   "Function to display messages to the user."
   msg=gtk.MessageDialog(None, gtk.DIALOG_MODAL,
@@ -23,14 +42,94 @@ def message(data=None):
   msg.destroy()
 
 def button1_clicked(self ):
-    self.set_label( "You clicked the right button")
+    self.set_label( "Just Had One.")
    # text = textbuffer.get_text( startiter, enditer) 
     textbuffer = textview.get_buffer()
     text = textbuffer.get_text(textbuffer.get_start_iter(), textbuffer.get_end_iter())
     label1.set_text(text)
+    textbuffer.set_text("01:00:00")
+    text = textbuffer.get_text(textbuffer.get_start_iter(), textbuffer.get_end_iter())
+    button2.set_label( "skipped smoke")
 
-def red_button_clicked(self):
-    self.set_label( "Please don't press this button again")
+    clock = time.strftime("%H:%M:%S")
+    if ':' in clock :
+        hours,minutes, seconds = text.split(':')
+        hours = int(hours)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        #convert to seconds
+        current_time = int (int(int(hours*60)*60) + int(minutes*60) + int(seconds))
+
+    if ':' in text :
+        hours,minutes, seconds = text.split(':')
+        hours = int(hours)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        #convert to seconds
+        
+        start_time = int (int(int(hours*60)*60) + int(minutes*60) + int(seconds))
+        finish_time = start_time + current_time
+    sendmessage("great")
+    print hours
+    print start_time
+
+def Skipped_clicked(self):
+    #label1.set_label( "skipped smoke")
+   # skippedSmokeCount(1)
+    #out = open( "test", 'w+')
+
+    #with out as f:
+    #    for r in f:
+    #        if r == "":
+    #            print("first smoke skipped")
+    #            out.write(1)
+    #        else:
+    #            print(r)
+    #            print("fount line in file")
+    #            out.write(int(r)+1)
+
+    fname = "config.ini"
+    if os.path.isfile(fname):
+        print("file exists ")
+
+
+
+        config = SafeConfigParser()
+        config.read('config.ini')
+
+        key1 = config.get('main', 'key1') # -> "value1"
+     #   print config.get('main', 'key2') # -> "value2"
+    #    print config.get('main', 'key3') # -> "value3"
+
+        # getfloat() raises an exception if the value is not a float
+       # a_float = config.getfloat('main', 'a_float')
+
+        # getint() and getboolean() also do this for their respective types
+        #an_int = config.getint('main', 'an_int')
+
+
+
+
+      #  config.add_section('main')
+        config.set('main', 'key1', str(int(key1)+1))
+
+        with open(fname, 'w') as f:
+            config.write(f)
+    else:
+        print("no such file exists at this time")
+        config = SafeConfigParser()
+        config.read('config.ini')
+        config.add_section('main')
+        config.set('main', 'key1', '1')
+        with open(fname, 'w') as f:
+            config.write(f)
+                    
+       
+    button1_clicked(label1)
+    label1.set_text("thanks for skipping the smoke")
+    #savings dollar a
+    #pack cost 15 for 25 so 60 cents per smoke
+    
 
 def hide_app(self,data=None):
     #win.hide_on_delete()
@@ -86,7 +185,7 @@ def open_app(data=None):
     button1.show()
     # second button
  #   button2 = gtk.Button( "Big red button")
-    button2.connect( "clicked", red_button_clicked)
+    button2.connect( "clicked", Skipped_clicked)
     button_box1.pack_start( button2)
     button2.show()
     # show the box
@@ -112,14 +211,26 @@ def open_app(data=None):
 #    scrolled_window.add(textview)
 #    mainbox.add(scrolled_window)
     win.show_all()
-  #  gobject.timeout_add(600, timeout)
+    gobject.timeout_add(3000, timeout)
 
 def timeout():
    # message("test")
     clock = time.strftime("%H:%M:%S")
-    print(clock)
-   # label1.set_text(clock)
-    label1.set_text("test")
+    if ':' in clock :
+        hours,minutes, seconds = clock.split(':')
+        hours = int(hours)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        #convert to seconds
+        current_time = int (int(int(hours*60)*60) + int(minutes*60) + int(seconds))
+    if int(start_time + current_time) == finish_time :
+        print "alarm"
+
+  #  print(clock)
+    difference = int(finish_time - int(start_time + current_time))/60 #minutes
+    label1.set_text(str(difference))
+   # label1.set_text("test")
+    #label1.set_label("test")
    # self.val +=1
    # self.scale.set_value(self.val)
     return True
@@ -155,6 +266,7 @@ def on_left_click(event):
 #def main( self):
 #      open_app()
 #      gtk.main() 
+
 
 
 if __name__ == '__main__':
