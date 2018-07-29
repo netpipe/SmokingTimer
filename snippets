@@ -1,0 +1,35 @@
+bongrips and cigs etc..
+SmokingTimer.py
+
+
+
+        b_level = int(round(float(slurp(BATT_NOW)) / float(slurp(BATT_FULL)) * 100))
+        b_file = IMAGE_LOC + "." + str(b_level / 10) + ".png"
+        self.tray.set_tooltip(
+            "%s: %d%%" %
+            (rstrip(slurp(BATT_STATE)), b_level)
+        )
+        if os.path.exists(b_file):
+            self.tray.set_from_file(b_file)
+self.tray.set_blinking(b_level <= 5)
+
+
+
+
+
+GdkPixbuf.Pixbuf.scale_simple ()
+
+iter = GdkPixbuf.PixbufAnimation.get_iter (GLib.get_current_time() )
+pbuf = iter.get_pixbuf ()
+# scale the pbuf below
+......
+# make this on a loop
+iter = iter.advance (GLib.get_current_time())
+
+# after getting all the pbuf, pack again into GdkPixbuf.PixbufSimpleAnim
+simpleanim = GdkPixbuf.PixbufSimpleAnim (width, height, rate)
+# loop again
+simpleanim.add_frame (pbuf)
+
+# after done all the chores, call the
+Gtk.Image.set_from_animation (simpleanim) #simpleanim implemented anim

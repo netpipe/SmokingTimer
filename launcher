@@ -1,0 +1,6 @@
+#!/bin/bash
+#Tecan
+#Description:
+
+python SmokingTimer.py #QuitSmokingApplet.py
+
